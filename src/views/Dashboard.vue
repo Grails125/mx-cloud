@@ -611,23 +611,6 @@ import { useDataStore } from "@/stores/data";
 import { useAlertStore } from "@/stores/alert";
 import { CloudProvider } from "@/types";
 import Layout from "@/components/Layout.vue";
-import { use } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-import { PieChart } from "echarts/charts";
-import {
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-} from "echarts/components";
-import VChart from "vue-echarts";
-
-use([
-  CanvasRenderer,
-  PieChart,
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-]);
 
 const accountStore = useAccountStore();
 const dataStore = useDataStore();
@@ -866,42 +849,6 @@ function formatImageSize(size: number): string {
     return `${(size / (1024 * 1024)).toFixed(2)}TB`;
   }
 }
-
-// 余额分布图表配置
-const balanceChartOption = computed(() => {
-  const data = dataStore.aggregatedData
-    .filter((item) => item.balance)
-    .map((item) => ({
-      value: item.balance!.balance,
-      name: item.account.name,
-    }));
-
-  return {
-    tooltip: {
-      trigger: "item",
-      formatter: "{b}: ¥{c} ({d}%)",
-    },
-    legend: {
-      orient: "vertical",
-      left: "left",
-    },
-    series: [
-      {
-        name: "账户余额",
-        type: "pie",
-        radius: "50%",
-        data: data,
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-          },
-        },
-      },
-    ],
-  };
-});
 
 function getProviderName(provider: CloudProvider): string {
   const map: Record<CloudProvider, string> = {

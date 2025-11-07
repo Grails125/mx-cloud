@@ -5,7 +5,6 @@
 
 import type { CloudAccount, AlertRule } from "@/types";
 import { encrypt, decrypt } from "./crypto";
-// @ts-expect-error - crypto-js 类型定义问题，但运行时可用
 import CryptoJS from "crypto-js";
 
 const STORAGE_KEY_ACCOUNTS = "mx_cloud_accounts";
