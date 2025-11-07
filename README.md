@@ -92,6 +92,69 @@ npm run preview
 yarn preview
 ```
 
+## 📦 部署
+
+### Vercel 一键部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Grails125/mx-cloud)
+
+点击上方按钮即可一键部署到 Vercel，无需任何配置！
+
+#### 手动部署到 Vercel
+
+1. **安装 Vercel CLI**（可选）
+
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **登录 Vercel**
+
+   ```bash
+   vercel login
+   ```
+
+3. **部署项目**
+
+   ```bash
+   vercel
+   ```
+
+   首次部署会提示配置：
+   - 项目名称：`mx-cloud`（或自定义）
+   - 构建命令：`npm run build`（已自动配置）
+   - 输出目录：`dist`（已自动配置）
+   - 框架预设：`Vite`（已自动配置）
+
+4. **生产环境部署**
+
+   ```bash
+   vercel --prod
+   ```
+
+#### Vercel 配置说明
+
+项目已包含 `vercel.json` 配置文件，自动配置了：
+
+- **构建命令**: `npm run build`
+- **输出目录**: `dist`
+- **框架**: `vite`
+- **安装命令**: `npm install`
+
+无需额外配置即可部署！
+
+#### 环境变量配置
+
+本项目为纯前端应用，无需配置环境变量。所有数据存储在浏览器本地。
+
+#### 部署注意事项
+
+- ✅ 支持自动 HTTPS
+- ✅ 全球 CDN 加速
+- ✅ 自动构建和部署
+- ✅ 支持自定义域名
+- ⚠️ 数据存储在浏览器本地，不会同步到服务器
+
 ## 🚀 快速开始
 
 ### 1. 首次使用
@@ -130,7 +193,7 @@ yarn preview
 
 ## 📁 项目结构
 
-```
+```text
 mx-cloud/
 ├── src/
 │   ├── adapters/          # 云服务适配器
@@ -163,6 +226,7 @@ mx-cloud/
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
+├── vercel.json          # Vercel 部署配置
 └── README.md
 ```
 
@@ -273,6 +337,46 @@ export enum CloudProvider {
    - 合理设置自动刷新间隔
    - 处理 API 限流错误
 3. **数据持久化**: 数据存储在浏览器本地，清除浏览器数据会丢失所有信息，请定期备份。
+
+## 🗺️ 未来计划
+
+### 即将支持的功能
+
+- ✅ **邮件提醒配置**
+  - 支持配置 SMTP 服务器
+  - 预警触发时自动发送邮件通知
+  - 支持自定义邮件模板
+  - 多收件人支持
+
+- ✅ **更多云服务商支持**
+  - **阿里云（Alibaba Cloud）** - 余额查询、ECS 实例管理、RDS 数据库监控
+  - **华为云（Huawei Cloud）** - 账户余额、ECS 资源、OBS 存储监控
+  - **腾讯云（Tencent Cloud）** - 账户信息、CVM 实例、COS 存储
+  - **AWS（Amazon Web Services）** - 账户余额、EC2 实例、S3 存储
+  - **Azure（Microsoft Azure）** - 订阅管理、虚拟机监控
+  - **Google Cloud Platform** - 账户信息、Compute Engine 监控
+
+### 功能增强
+
+- 📊 **数据可视化增强**
+  - 更多图表类型（折线图、柱状图等）
+  - 自定义仪表盘布局
+  - 数据导出（Excel、CSV）
+
+- 🔔 **通知渠道扩展**
+  - 企业微信/钉钉机器人通知
+  - Webhook 支持
+  - 短信通知（需第三方服务）
+
+- 🔐 **安全增强**
+  - 双因素认证（2FA）
+  - 密码强度检测
+  - 登录日志记录
+
+- 🌐 **国际化支持**
+  - 多语言界面（英文、日文等）
+  - 时区设置
+  - 货币单位自定义
 
 ## 🤝 贡献
 
