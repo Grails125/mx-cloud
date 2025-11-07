@@ -279,7 +279,7 @@ export interface UHostInstance {
  */
 export interface EIP {
   eipId?: string;
-  eipAddr?: string;
+  eipAddr?: string | Array<{ IP?: string; OperatorName?: string }>; // EIP地址，可能是字符串或数组
   bandwidth?: number;
   bandwidthType?: string;
   createTime?: number;

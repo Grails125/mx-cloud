@@ -11,7 +11,6 @@ import type {
   CloudAccount,
   UCloudProject,
   UHostInstance,
-  UDisk,
   UHostImage,
   EIP,
 } from "@/types";

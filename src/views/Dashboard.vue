@@ -431,16 +431,18 @@
                       </div>
                       <div
                         class="eip-meta-row"
-                        v-if="eip.eipAddr && eip.eipAddr.length > 0"
+                        v-if="eip.eipAddr && (typeof eip.eipAddr === 'string' || (Array.isArray(eip.eipAddr) && eip.eipAddr.length > 0))"
                       >
                         <span class="eip-meta-label">IP地址:</span>
                         <span class="eip-meta-value">{{
-                          eip.eipAddr[0]?.IP || "-"
+                          typeof eip.eipAddr === 'string' 
+                            ? eip.eipAddr 
+                            : (eip.eipAddr[0]?.IP || "-")
                         }}</span>
                       </div>
                       <div
                         class="eip-meta-row"
-                        v-if="eip.eipAddr && eip.eipAddr.length > 0"
+                        v-if="eip.eipAddr && Array.isArray(eip.eipAddr) && eip.eipAddr.length > 0"
                       >
                         <span class="eip-meta-label">线路:</span>
                         <span class="eip-meta-value">{{

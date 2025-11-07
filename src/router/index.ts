@@ -50,7 +50,7 @@ const router = createRouter({
 });
 
 // 路由守卫：检查认证状态
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const accountStore = useAccountStore();
   const isAuthenticated = accountStore.masterPassword !== "";
 
