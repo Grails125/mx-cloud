@@ -605,7 +605,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useAccountStore } from "@/stores/account";
 import { useDataStore } from "@/stores/data";
 import { useAlertStore } from "@/stores/alert";
