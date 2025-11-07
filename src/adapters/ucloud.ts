@@ -20,11 +20,24 @@ import type {
 
 export class UCloudAdapter extends BaseAdapter {
   private apiClient: AxiosInstance;
+  private useProxy: boolean;
 
   constructor() {
     super();
+    // 检测是否在生产环境（Vercel部署）
+    // 注意：在 Vercel 部署时，需要通过代理来避免 CORS 问题
+    this.useProxy =
+      typeof window !== "undefined" &&
+      (window.location.hostname.includes("vercel.app") ||
+        window.location.hostname.includes("vercel.com") ||
+        import.meta.env.PROD);
+
+    const baseURL = this.useProxy
+      ? "/api/proxy" // 使用 Vercel Serverless Function 代理
+      : "https://api.ucloud.cn"; // 本地开发直接调用
+
     this.apiClient = axios.create({
-      baseURL: "https://api.ucloud.cn",
+      baseURL,
       timeout: 10000,
     });
   }
@@ -59,6 +72,27 @@ export class UCloudAdapter extends BaseAdapter {
       return str;
     }
     return String(value);
+  }
+
+  /**
+   * 执行 API 请求（自动处理代理）
+   */
+  private async makeRequest(params: Record<string, any>): Promise<any> {
+    if (this.useProxy) {
+      // 使用代理：将完整URL和参数传递给代理
+      const url = "https://api.ucloud.cn/";
+      const response = await this.apiClient.get("/", {
+        params: {
+          url,
+          ...params,
+        },
+      });
+      return response.data;
+    } else {
+      // 直接调用：使用标准方式
+      const response = await this.apiClient.get("/", { params });
+      return response.data;
+    }
   }
 
   /**
@@ -129,9 +163,7 @@ export class UCloudAdapter extends BaseAdapter {
   async getBalance(account: CloudAccount): Promise<AccountBalance> {
     try {
       const params = this.buildRequestParams(account, "GetBalance");
-      const response = await this.apiClient.get("/", { params });
-
-      const data = response.data;
+      const data = await this.makeRequest(params);
 
       // 检查返回状态码
       if (data.RetCode !== 0) {
@@ -195,9 +227,7 @@ export class UCloudAdapter extends BaseAdapter {
   async getRegionList(account: CloudAccount): Promise<UCloudRegion[]> {
     try {
       const params = this.buildRequestParams(account, "GetRegion");
-      const response = await this.apiClient.get("/", { params });
-
-      const data = response.data;
+      const data = await this.makeRequest(params);
 
       // 检查返回状态码
       if (data.RetCode !== 0) {
@@ -242,20 +272,20 @@ export class UCloudAdapter extends BaseAdapter {
       const params = this.buildRequestParams(account, "DescribeUHostInstance", {
         Region: region,
       });
-      const response = await this.apiClient.get("/", { params });
+      const data = await this.makeRequest(params);
 
       // 检查返回状态码
-      if (response.data.RetCode !== 0) {
+      if (data.RetCode !== 0) {
         // 某些地域可能没有权限或没有实例，不抛出错误
         console.warn(
-          `获取地域 ${region} 的UHost实例失败 (RetCode: ${
-            response.data.RetCode
-          }): ${response.data.Message || ""}`
+          `获取地域 ${region} 的UHost实例失败 (RetCode: ${data.RetCode}): ${
+            data.Message || ""
+          }`
         );
         return { instances: [], hasInstances: false };
       }
 
-      const instances = response.data?.UHostSet || [];
+      const instances = data?.UHostSet || [];
       // 转换实例数据格式，添加地域信息
       const mappedInstances = instances.map((instance: any) => ({
         zone: instance.Zone,
@@ -421,9 +451,7 @@ export class UCloudAdapter extends BaseAdapter {
         "DescribeUDisk",
         additionalParams
       );
-      const response = await this.apiClient.get("/", { params });
-
-      const data = response.data;
+      const data = await this.makeRequest(params);
 
       // 检查返回状态码
       if (data.RetCode !== 0) {
@@ -501,9 +529,7 @@ export class UCloudAdapter extends BaseAdapter {
         "DescribeImage",
         additionalParams
       );
-      const response = await this.apiClient.get("/", { params });
-
-      const data = response.data;
+      const data = await this.makeRequest(params);
 
       // 检查返回状态码
       if (data.RetCode !== 0) {
@@ -581,9 +607,7 @@ export class UCloudAdapter extends BaseAdapter {
         "DescribeEIPWithAllNum",
         additionalParams
       );
-      const response = await this.apiClient.get("/", { params });
-
-      const data = response.data;
+      const data = await this.makeRequest(params);
 
       // 检查返回状态码
       if (data.RetCode !== 0) {
@@ -729,9 +753,7 @@ export class UCloudAdapter extends BaseAdapter {
         "ListProjects",
         additionalParams
       );
-      const response = await this.apiClient.get("/", { params });
-
-      const data = response.data;
+      const data = await this.makeRequest(params);
 
       // 检查返回状态码
       if (data.RetCode !== 0) {
