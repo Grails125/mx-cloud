@@ -3,13 +3,15 @@
  * 使用 localStorage 存储加密后的账户数据
  */
 
-import type { CloudAccount, AlertRule } from "@/types";
+import type { CloudAccount, AlertRule, EmailJSConfig, EmailTemplate } from "@/types";
 import { encrypt, decrypt } from "./crypto";
 import CryptoJS from "crypto-js";
 
 const STORAGE_KEY_ACCOUNTS = "mx_cloud_accounts";
 const STORAGE_KEY_RULES = "mx_cloud_alert_rules";
 const STORAGE_KEY_MASTER_PASSWORD = "mx_cloud_master_password_hash";
+const STORAGE_KEY_EMAILJS_CONFIG = "mx_cloud_emailjs_config";
+const STORAGE_KEY_EMAIL_TEMPLATES = "mx_cloud_email_templates";
 
 /**
  * 检查 Web Crypto API 是否可用
@@ -149,4 +151,66 @@ export function clearAllStorage(): void {
   localStorage.removeItem(STORAGE_KEY_ACCOUNTS);
   localStorage.removeItem(STORAGE_KEY_RULES);
   localStorage.removeItem(STORAGE_KEY_MASTER_PASSWORD);
+  localStorage.removeItem(STORAGE_KEY_EMAILJS_CONFIG);
+  localStorage.removeItem(STORAGE_KEY_EMAIL_TEMPLATES);
+}
+
+/**
+ * 保存 EmailJS 配置
+ */
+export function saveEmailJSConfig(config: EmailJSConfig): void {
+  localStorage.setItem(STORAGE_KEY_EMAILJS_CONFIG, JSON.stringify(config));
+}
+
+/**
+ * 加载 EmailJS 配置
+ */
+export function loadEmailJSConfig(): EmailJSConfig | null {
+  const data = localStorage.getItem(STORAGE_KEY_EMAILJS_CONFIG);
+  if (!data) return null;
+
+  try {
+    return JSON.parse(data) as EmailJSConfig;
+  } catch (error) {
+    console.error("加载 EmailJS 配置失败:", error);
+    return null;
+  }
+}
+
+/**
+ * 保存邮件模板
+ */
+export function saveEmailTemplates(templates: EmailTemplate[]): void {
+  localStorage.setItem(STORAGE_KEY_EMAIL_TEMPLATES, JSON.stringify(templates));
+}
+
+/**
+ * 加载邮件模板
+ */
+export function loadEmailTemplates(): EmailTemplate[] {
+  const data = localStorage.getItem(STORAGE_KEY_EMAIL_TEMPLATES);
+  if (!data) {
+    // 返回默认模板
+    return [
+      {
+        id: "default",
+        name: "默认模板",
+        subject: "云资产预警通知 - {accountName}",
+        body: `账户名称: {accountName}
+预警级别: {level}
+预警消息: {message}
+触发时间: {time}
+阈值: {threshold}
+操作符: {operator}`,
+        isDefault: true,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+    ];
+  }
+  try {
+    return JSON.parse(data) as EmailTemplate[];
+  } catch {
+    return [];
+  }
 }

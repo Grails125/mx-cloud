@@ -46,36 +46,40 @@ function handleLogout() {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-color);
 }
 
 .header {
-  background: var(--card-bg);
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 980px; /* Apple's content width is often narrower, around 980px or 1024px */
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 48px; /* Apple's nav is usually 44px or 48px */
 }
 
 .logo {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
-  color: var(--primary-color);
+  color: var(--text-color);
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .nav {
   display: flex;
-  gap: 32px;
+  gap: 36px;
   flex: 1;
   margin-left: 48px;
 }
@@ -83,12 +87,15 @@ function handleLogout() {
 .nav-item {
   position: relative;
   padding: 8px 0;
-  color: var(--text-color);
+  color: var(--text-secondary); /* Default to gray */
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  font-size: 12px; /* Apple nav is usually small */
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 .nav-item:hover {
@@ -96,7 +103,7 @@ function handleLogout() {
 }
 
 .nav-item.router-link-active {
-  color: var(--primary-color);
+  color: var(--text-color); /* Active is black/dark */
   font-weight: 500;
 }
 
@@ -104,24 +111,25 @@ function handleLogout() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 6px;
-  font-size: 12px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
   background: var(--error-color);
   color: #fff;
-  border-radius: 9px;
+  border-radius: 8px;
+  font-weight: 600;
 }
 
 .main {
   flex: 1;
-  padding: 24px 0;
+  padding: 40px 0;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 22px;
 }
 </style>
 

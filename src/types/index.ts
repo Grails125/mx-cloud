@@ -43,6 +43,28 @@ export interface ResourceUsage {
 }
 
 /**
+ * EmailJS 配置
+ */
+export interface EmailJSConfig {
+  serviceId: string; // EmailJS Service ID
+  templateId: string; // EmailJS Template ID
+  publicKey: string; // EmailJS Public Key
+}
+
+/**
+ * 邮件模板
+ */
+export interface EmailTemplate {
+  id: string;
+  name: string; // 模板名称
+  subject: string; // 邮件主题模板（支持变量：{accountName}, {message}, {level}, {time}）
+  body: string; // 邮件正文模板（支持变量：{accountName}, {message}, {level}, {time}, {threshold}, {operator}）
+  isDefault: boolean; // 是否为默认模板
+  createdAt: number;
+  updatedAt: number;
+}
+
+/**
  * 预警规则配置
  */
 export interface AlertRule {
@@ -52,6 +74,9 @@ export interface AlertRule {
   threshold: number;
   operator: "lt" | "lte" | "gt" | "gte";
   enabled: boolean;
+  emailEnabled?: boolean; // 是否启用邮件通知
+  emailRecipients?: string[]; // 邮件收件人列表
+  emailTemplateId?: string; // 使用的邮件模板ID
   createdAt: number;
 }
 

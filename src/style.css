@@ -1,130 +1,171 @@
 /**
- * 全局样式
+ * 全局样式 - Apple Design Style
  */
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
-  --primary-color: #1890ff;
-  --success-color: #52c41a;
-  --warning-color: #faad14;
-  --error-color: #f5222d;
-  --text-color: #333;
-  --text-secondary: #666;
-  --border-color: #d9d9d9;
-  --bg-color: #f5f5f5;
+  /* Apple Colors */
+  --primary-color: #0071e3; /* Apple Blue */
+  --primary-hover: #0077ed;
+  --success-color: #34c759; /* Apple Green */
+  --warning-color: #ff9f0a; /* Apple Orange */
+  --error-color: #ff3b30;   /* Apple Red */
+  
+  --text-color: #1d1d1f;    /* Apple Black */
+  --text-secondary: #86868b; /* Apple Gray */
+  
+  --border-color: #d2d2d7;
+  --bg-color: #f5f5f7;      /* Apple Light Gray Background */
   --card-bg: #ffffff;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+  
+  /* Shadows */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.05);
+  
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
-    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px; /* Apple uses 17px for body usually, but 14px is good for dense dashboards. Let's stick to 14px or bump to 15px */
+  line-height: 1.47059;
+  letter-spacing: -0.022em;
   color: var(--text-color);
   background-color: var(--bg-color);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
   min-height: 100vh;
 }
 
-/* 通用按钮样式 */
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--text-color);
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 19px;
+  margin-bottom: 15px;
+}
+
+/* 通用按钮样式 - Apple Style */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 8px 16px;
   font-size: 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: 980px; /* Pill shape */
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
   background: var(--card-bg);
   color: var(--text-color);
+  line-height: 1.14286;
 }
 
 .btn:hover {
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+  transform: scale(1.02);
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn-primary {
   background: var(--primary-color);
-  border-color: var(--primary-color);
   color: #fff;
 }
 
 .btn-primary:hover {
-  background: #40a9ff;
-  border-color: #40a9ff;
-  color: #fff;
+  background: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
 }
 
 .btn-secondary {
-  background: var(--card-bg);
-  border-color: var(--border-color);
+  background: rgba(0, 0, 0, 0.05); /* Light gray background */
   color: var(--text-color);
 }
 
 .btn-secondary:hover {
-  background: var(--bg-color);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .btn-secondary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-danger {
-  background: var(--error-color);
-  border-color: var(--error-color);
-  color: #fff;
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--error-color);
 }
 
 .btn-danger:hover {
-  background: #ff4d4f;
-  border-color: #ff4d4f;
+  background: var(--error-color);
+  color: #fff;
 }
 
-/* 卡片样式 */
+/* 卡片样式 - Apple Style */
 .card {
   background: var(--card-bg);
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: var(--shadow);
-  margin-bottom: 16px;
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 24px;
+  border: 1px solid rgba(0,0,0,0.02);
+  transition: box-shadow 0.3s ease;
 }
 
-/* 输入框样式 */
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+/* 输入框样式 - Apple Style */
 .input {
   width: 100%;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 10px 14px;
+  font-size: 15px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
-  transition: all 0.3s;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
 }
 
 .input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2);
+  background-color: #fff;
 }
 
 /* 标签样式 */
@@ -133,6 +174,57 @@ body {
   margin-bottom: 8px;
   font-weight: 500;
   color: var(--text-color);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+
+/* 开关样式 (Switch) - Apple Style */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 30px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e9e9ea;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+input:checked + .slider {
+  background-color: var(--success-color); /* Apple uses green for active switches */
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
 }
 
 /* 加载状态 */
@@ -142,13 +234,16 @@ body {
   justify-content: center;
   padding: 40px;
   color: var(--text-secondary);
+  font-weight: 500;
 }
 
 /* 空状态 */
 .empty {
   text-align: center;
-  padding: 40px;
+  padding: 60px 40px;
   color: var(--text-secondary);
+  background: rgba(0,0,0,0.02);
+  border-radius: var(--radius-md);
 }
 
 /* 工具类 */

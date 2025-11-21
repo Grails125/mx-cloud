@@ -182,6 +182,64 @@
               </label>
             </div>
 
+            <div class="form-group">
+              <label class="switch-label">
+                <input
+                  v-model="ruleFormData.emailEnabled"
+                  type="checkbox"
+                  class="checkbox"
+                />
+                <span>启用邮件通知</span>
+              </label>
+            </div>
+
+            <div v-if="ruleFormData.emailEnabled" class="form-group">
+              <label class="label">邮件收件人</label>
+              <div class="email-recipients">
+                <div
+                  v-for="(email, index) in ruleFormData.emailRecipients"
+                  :key="index"
+                  class="email-recipient-item"
+                >
+                  <input
+                    v-model="ruleFormData.emailRecipients[index]"
+                    type="email"
+                    class="input"
+                    placeholder="请输入邮箱地址"
+                    style="flex: 1"
+                  />
+                  <button
+                    type="button"
+                    @click="removeEmailRecipient(index)"
+                    class="btn btn-danger btn-sm"
+                  >
+                    删除
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  @click="addEmailRecipient"
+                  class="btn btn-secondary btn-sm"
+                >
+                  + 添加收件人
+                </button>
+              </div>
+            </div>
+
+            <div v-if="ruleFormData.emailEnabled" class="form-group">
+              <label class="label">邮件模板</label>
+              <select v-model="ruleFormData.emailTemplateId" class="input">
+                <option value="">使用默认模板</option>
+                <option
+                  v-for="template in emailTemplates"
+                  :key="template.id"
+                  :value="template.id"
+                >
+                  {{ template.name }}
+                </option>
+              </select>
+            </div>
+
             <div v-if="error" class="error-message">{{ error }}</div>
 
             <div class="modal-footer">
@@ -203,7 +261,8 @@
 import { ref, reactive, onMounted } from "vue";
 import { useAccountStore } from "@/stores/account";
 import { useAlertStore } from "@/stores/alert";
-import type { AlertRule } from "@/types";
+import { loadEmailTemplates } from "@/utils/storage";
+import type { AlertRule, EmailTemplate } from "@/types";
 import Layout from "@/components/Layout.vue";
 
 const accountStore = useAccountStore();
@@ -213,6 +272,7 @@ const showRuleModal = ref(false);
 const editingRule = ref<AlertRule | null>(null);
 const loading = ref(false);
 const error = ref("");
+const emailTemplates = ref<EmailTemplate[]>([]);
 
 const ruleFormData = reactive({
   accountId: "",
@@ -220,6 +280,9 @@ const ruleFormData = reactive({
   operator: "" as "lt" | "lte" | "gt" | "gte" | "",
   threshold: 0,
   enabled: true,
+  emailEnabled: false,
+  emailRecipients: [] as string[],
+  emailTemplateId: "",
 });
 
 function getAccountName(accountId: string): string {
@@ -249,6 +312,9 @@ function handleEditRule(rule: AlertRule) {
   ruleFormData.operator = rule.operator;
   ruleFormData.threshold = rule.threshold;
   ruleFormData.enabled = rule.enabled;
+  ruleFormData.emailEnabled = rule.emailEnabled || false;
+  ruleFormData.emailRecipients = rule.emailRecipients ? [...rule.emailRecipients] : [];
+  ruleFormData.emailTemplateId = rule.emailTemplateId || "";
 }
 
 function closeRuleModal() {
@@ -260,6 +326,17 @@ function closeRuleModal() {
   ruleFormData.operator = "" as "lt" | "lte" | "gt" | "gte" | "";
   ruleFormData.threshold = 0;
   ruleFormData.enabled = true;
+  ruleFormData.emailEnabled = false;
+  ruleFormData.emailRecipients = [];
+  ruleFormData.emailTemplateId = "";
+}
+
+function addEmailRecipient() {
+  ruleFormData.emailRecipients.push("");
+}
+
+function removeEmailRecipient(index: number) {
+  ruleFormData.emailRecipients.splice(index, 1);
 }
 
 function handleToggleRule(ruleId: string, event: Event) {
@@ -303,6 +380,8 @@ function handleDeleteRule(ruleId: string) {
 onMounted(() => {
   alertStore.loadRules();
   alertStore.requestNotificationPermission();
+  // 加载邮件模板
+  emailTemplates.value = loadEmailTemplates();
 });
 </script>
 
@@ -492,6 +571,18 @@ input:checked + .slider:before {
 .btn-sm {
   padding: 4px 12px;
   font-size: 12px;
+}
+
+.email-recipients {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.email-recipient-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .switch-label {

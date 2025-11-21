@@ -73,6 +73,84 @@
           </div>
         </div>
 
+        <!-- EmailJS 配置 -->
+        <div class="settings-section">
+          <h3>EmailJS 配置</h3>
+          <div class="card">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Service ID</h4>
+                <p>EmailJS 服务 ID</p>
+              </div>
+              <div class="setting-control">
+                <input
+                  v-model="emailJSConfig.serviceId"
+                  type="text"
+                  class="input"
+                  placeholder="service_xxxxxx"
+                  style="width: 250px"
+                />
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Template ID</h4>
+                <p>EmailJS 模板 ID</p>
+              </div>
+              <div class="setting-control">
+                <input
+                  v-model="emailJSConfig.templateId"
+                  type="text"
+                  class="input"
+                  placeholder="template_xxxxxx"
+                  style="width: 250px"
+                />
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>Public Key</h4>
+                <p>EmailJS Public Key</p>
+              </div>
+              <div class="setting-control">
+                <input
+                  v-model="emailJSConfig.publicKey"
+                  type="text"
+                  class="input"
+                  placeholder="public_key_xxxxxx"
+                  style="width: 250px"
+                />
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4>操作</h4>
+                <p>保存配置或测试连接</p>
+              </div>
+              <div class="setting-control">
+                <button
+                  @click="handleSaveEmailJSConfig"
+                  class="btn btn-primary"
+                  :disabled="savingConfig"
+                >
+                  {{ savingConfig ? "保存中..." : "保存配置" }}
+                </button>
+                <button
+                  @click="handleTestEmailJS"
+                  class="btn btn-secondary"
+                  :disabled="testingConfig"
+                  style="margin-left: 12px"
+                >
+                  {{ testingConfig ? "测试中..." : "测试连接" }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 数据备份与恢复 -->
         <div class="settings-section">
           <h3>数据备份与恢复</h3>
@@ -155,11 +233,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useAccountStore } from "@/stores/account";
 import { useAlertStore } from "@/stores/alert";
 import { useDataStore } from "@/stores/data";
-import { clearAllStorage } from "@/utils/storage";
+import {
+  clearAllStorage,
+  saveEmailJSConfig,
+  loadEmailJSConfig,
+} from "@/utils/storage";
+import { sendEmail } from "@/utils/email";
+import type { EmailJSConfig } from "@/types";
 import Layout from "@/components/Layout.vue";
 
 const accountStore = useAccountStore();
@@ -170,10 +254,18 @@ const autoRefreshInterval = ref(30);
 const notificationEnabled = ref(false);
 const alertEmail = ref("");
 const testingEmail = ref(false);
+const savingConfig = ref(false);
+const testingConfig = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 let refreshTimer: number | null = null;
 
-onMounted(() => {
+const emailJSConfig = reactive<EmailJSConfig>({
+  serviceId: "",
+  templateId: "",
+  publicKey: "",
+});
+
+onMounted(async () => {
   // 加载设置
   const savedInterval = localStorage.getItem("autoRefreshInterval");
   if (savedInterval) {
@@ -188,6 +280,18 @@ onMounted(() => {
   const savedEmail = localStorage.getItem("alertEmail");
   if (savedEmail) {
     alertEmail.value = savedEmail;
+  }
+
+  // 加载 EmailJS 配置
+  if (accountStore.masterPassword) {
+    try {
+      const savedConfig = await loadEmailJSConfig();
+      if (savedConfig) {
+        Object.assign(emailJSConfig, savedConfig);
+      }
+    } catch (error) {
+      console.error("加载 EmailJS 配置失败:", error);
+    }
   }
 
   // 启动自动刷新
@@ -260,6 +364,70 @@ function handleTestEmail() {
     testingEmail.value = false;
     alert("测试邮件已发送，请检查邮箱");
   }, 1500);
+}
+
+async function handleSaveEmailJSConfig() {
+  if (
+    !emailJSConfig.serviceId ||
+    !emailJSConfig.templateId ||
+    !emailJSConfig.publicKey
+  ) {
+    alert("请填写完整的 EmailJS 配置信息");
+    return;
+  }
+
+  if (!accountStore.masterPassword) {
+    alert("请先登录");
+    return;
+  }
+
+  savingConfig.value = true;
+  try {
+    await saveEmailJSConfig(emailJSConfig);
+    alert("EmailJS 配置保存成功");
+  } catch (error: unknown) {
+    console.error("保存 EmailJS 配置失败:", error);
+    alert("保存失败: " + (error instanceof Error ? error.message : "未知错误"));
+  } finally {
+    savingConfig.value = false;
+  }
+}
+
+async function handleTestEmailJS() {
+  if (
+    !emailJSConfig.serviceId ||
+    !emailJSConfig.templateId ||
+    !emailJSConfig.publicKey
+  ) {
+    alert("请先填写完整的 EmailJS 配置信息");
+    return;
+  }
+
+  if (!alertEmail.value) {
+    alert("请先设置测试邮箱地址");
+    return;
+  }
+
+  testingConfig.value = true;
+  try {
+    const result = await sendEmail({
+      to: [alertEmail.value],
+      subject: "EmailJS 配置测试",
+      body: "这是一封测试邮件，如果您收到此邮件，说明 EmailJS 配置正确。",
+      emailJSConfig,
+    });
+
+    if (result.success) {
+      alert("测试邮件发送成功，请检查邮箱");
+    } else {
+      alert("测试失败: " + (result.error || "未知错误"));
+    }
+  } catch (error: unknown) {
+    console.error("测试 EmailJS 失败:", error);
+    alert("测试失败: " + (error instanceof Error ? error.message : "未知错误"));
+  } finally {
+    testingConfig.value = false;
+  }
 }
 
 function handleExport() {
@@ -336,6 +504,8 @@ function handleClearAll() {
   localStorage.removeItem("autoRefreshInterval");
   localStorage.removeItem("notificationEnabled");
   localStorage.removeItem("alertEmail");
+  localStorage.removeItem("mx_cloud_emailjs_config");
+  localStorage.removeItem("mx_cloud_email_templates");
 
   alert("所有数据已清除");
   window.location.href = "/login";
@@ -408,50 +578,7 @@ function handleClearAll() {
   color: var(--text-secondary);
 }
 
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.3s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: var(--primary-color);
-}
-
-input:checked + .slider:before {
-  transform: translateX(20px);
-}
 
 .about-content h4 {
   font-size: 20px;

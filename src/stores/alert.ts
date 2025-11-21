@@ -6,8 +6,10 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { AlertRule, AlertNotification } from '@/types'
 import { generateId } from '@/utils/crypto'
-import { saveAlertRules, loadAlertRules } from '@/utils/storage'
+import { saveAlertRules, loadAlertRules, loadEmailJSConfig, loadEmailTemplates } from '@/utils/storage'
+import { sendEmail, renderEmailTemplate, formatEmailTime, formatEmailLevel, formatEmailOperator } from '@/utils/email'
 import { useDataStore } from './data'
+import { useAccountStore } from './account'
 
 export const useAlertStore = defineStore('alert', () => {
   const rules = ref<AlertRule[]>([])
@@ -92,14 +94,28 @@ export const useAlertStore = defineStore('alert', () => {
    */
   async function checkAlerts() {
     const dataStore = useDataStore()
+    const accountStore = useAccountStore()
     if (rules.value.length === 0) return
 
     isChecking.value = true
     try {
       const enabledRules = rules.value.filter(r => r.enabled)
       
+      // 加载 EmailJS 配置
+      let emailJSConfig = null
+      if (accountStore.masterPassword) {
+        // 注意：这里不再需要 masterPassword 解密，因为我们移除了加密逻辑，
+        // 但为了保持调用一致性或者如果 loadEmailJSConfig 以后需要解密，可以保留逻辑。
+        // 不过目前的 loadEmailJSConfig 不需要参数。
+        // 让我们检查一下 storage.ts 的定义。
+        // loadEmailJSConfig 不需要参数。
+        emailJSConfig = loadEmailJSConfig()
+      }
+      const templates = loadEmailTemplates()
+      
       for (const rule of enabledRules) {
         const balance = dataStore.getAccountBalance(rule.accountId)
+        const account = accountStore.getAccountById(rule.accountId)
 
         let shouldAlert = false
         let message = ''
@@ -141,6 +157,38 @@ export const useAlertStore = defineStore('alert', () => {
                 icon: '/vite.svg',
                 tag: notification.id
               })
+            }
+
+            // 发送邮件通知
+            if (rule.emailEnabled && rule.emailRecipients && rule.emailRecipients.length > 0 && emailJSConfig) {
+              try {
+                // 获取邮件模板
+                const templateId = rule.emailTemplateId || 'default'
+                const template = templates.find(t => t.id === templateId) || templates.find(t => t.isDefault) || templates[0]
+                
+                if (template) {
+                  // 渲染邮件模板
+                  const { subject, body } = renderEmailTemplate(template, {
+                    accountName: account?.name || '未知账户',
+                    message,
+                    level: formatEmailLevel(level),
+                    time: formatEmailTime(Date.now()),
+                    threshold: String(rule.threshold),
+                    operator: formatEmailOperator(rule.operator),
+                  })
+
+                  // 发送邮件
+                  await sendEmail({
+                    to: rule.emailRecipients,
+                    subject,
+                    body,
+                    emailJSConfig,
+                  })
+                }
+              } catch (error) {
+                console.error('发送邮件失败:', error)
+                // 邮件发送失败不影响其他功能
+              }
             }
           }
         }
