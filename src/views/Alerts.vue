@@ -197,7 +197,7 @@
               <label class="label">邮件收件人</label>
               <div class="email-recipients">
                 <div
-                  v-for="(email, index) in ruleFormData.emailRecipients"
+                  v-for="(_, index) in ruleFormData.emailRecipients"
                   :key="index"
                   class="email-recipient-item"
                 >
